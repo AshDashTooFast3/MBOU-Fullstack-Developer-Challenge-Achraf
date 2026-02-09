@@ -1,13 +1,12 @@
 <?php
 
+use App\Http\Controllers\CategorieController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CategorieController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::apiResource('categories', CategorieController::class);
-
-
+Route::get('/categories', [CategorieController::class, 'index']);
+Route::get('/categories/{categorie}', [CategorieController::class, 'show']);

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Application;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -15,5 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+         $exceptions->renderable(function (NotFoundHttpException $e) {
+            return response()->json(['message' => 'Resource you are looking for was not found.'], 404);
+        });
     })->create();

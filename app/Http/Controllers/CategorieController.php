@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Http\Resources\CategorieResource;
-use App\Models\Categorie;
 use App\Http\Requests\StoreCategorieRequest;
 use App\Http\Requests\UpdateCategorieRequest;
+use App\Http\Resources\CategorieResource;
+use App\Models\Categorie;
+
 class CategorieController extends Controller
 {
     /**
@@ -28,7 +29,7 @@ class CategorieController extends Controller
      */
     public function show(Categorie $categorie)
     {
-        //
+        return new CategorieResource($categorie);
     }
 
     /**
