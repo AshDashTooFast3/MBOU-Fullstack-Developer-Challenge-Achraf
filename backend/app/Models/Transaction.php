@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
+
  
 class Transaction extends Model
-{
+{ 
     protected $fillable = [
         'category_id',
         'user_id',
@@ -40,5 +43,19 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('by_user', function (Builder $builder) {
+            if (Auth::check()) {
+                $builder->where('user_id', Auth::id());
+            }
+        });
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateTransactionRequest;
 use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
  
 class TransactionController extends Controller
 {
@@ -16,7 +17,8 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        return TransactionResource::collection(Transaction::all());
+        return TransactionResource::collection(Auth::user()->transactions);
+        
     }
  
     /**
@@ -24,7 +26,9 @@ class TransactionController extends Controller
      */
     public function store(StoreTransactionRequest $request)
     {
-        return new TransactionResource(Transaction::create($request->validated()));
+        $transaction = Auth::user()->transactions()->create($request->validated());
+ 
+        return new TransactionResource($transaction);
     }
  
     /**
