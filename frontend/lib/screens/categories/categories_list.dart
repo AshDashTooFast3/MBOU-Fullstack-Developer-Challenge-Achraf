@@ -22,10 +22,13 @@ class CategoriesList extends StatefulWidget {
 
 class CategoriesListState extends State<CategoriesList> {
   Future<List<Category>>? futureCategories;
+  final _formKey = GlobalKey<FormState>();
+  late Category selectedCategory;
+  final categoryNameController = TextEditingController();
 
   Future<List<Category>> fetchCategories() async {
     final http.Response response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/categories'),
+      Uri.parse('https://ec90-78-58-236-130.ngrok-free.app/api/categories'),
     );
 
     final Map<String, dynamic> data = json.decode(response.body);
@@ -37,6 +40,26 @@ class CategoriesListState extends State<CategoriesList> {
     List categories = data['data'];
 
     return categories.map((category) => Category.fromJson(category)).toList();
+  }
+
+  Future saveCategory() async {
+    final form = _formKey.currentState;
+
+    if (!form!.validate()) {
+      return;
+    }
+
+    String url =
+        'https://ec90-78-58-236-130.ngrok-free.app/api/categories/${selectedCategory.id}';
+    final http.Response response = await http.put(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{'name': categoryNameController.text}),
+    );
+
+    Navigator.pop(context);
   }
 
   @override
@@ -57,7 +80,53 @@ class CategoriesListState extends State<CategoriesList> {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 Category category = snapshot.data![index];
-                return ListTile(title: Text(category.name));
+                return ListTile(
+                  title: Text(category.name),
+                  trailing: IconButton(
+                    onPressed: () {
+                      selectedCategory = category;
+                      categoryNameController.text = category.name;
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Container(
+                            padding: EdgeInsets.all(20),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  Text('Edit Category'),
+                                  TextFormField(
+                                    decoration: InputDecoration(
+                                      labelText: 'Category Name',
+                                    ),
+                                    controller: categoryNameController,
+                                    validator: (String? value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter category name';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 20),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        saveCategory();
+                                      },
+                                      child: Text('Update'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    icon: Icon(Icons.edit),
+                  ),
+                );
               },
             );
           } else if (snapshot.hasError) {
